@@ -15,10 +15,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Render Deploy Hook
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
         run: |
-          echo "Triggering Render webhook..."
-          curl -s "${{ secrets.RENDER_DEPLOY_HOOK }}" > /dev/null
-          echo "Render deployment triggered successfully!"
+          if [ -z "$RENDER_DEPLOY_HOOK" ]; then
+            echo "::warning:: Secret 'RENDER_DEPLOY_HOOK' is not set! Skipping backend trigger. Please configure this secret in GitHub repository settings to automate Render deployment."
+          else
+            echo "Triggering Render webhook..."
+            curl -s -f "$RENDER_DEPLOY_HOOK" > /dev/null
+            echo "Render deployment triggered successfully!"
+          fi
 
   # JOB 2: Build and Deploy Frontend to GitHub Pages
   deploy-frontend:
@@ -45,7 +51,11 @@ jobs:
         working-directory: ./frontend
         env:
           VITE_API_BASE_URL: ${{ secrets.RENDER_APP_URL }}
-        run: npm run build
+        run: |
+          if [ -z "$VITE_API_BASE_URL" ]; then
+            echo "::warning:: Secret 'RENDER_APP_URL' is not set! Using relative '/api' endpoints for production. Configure 'RENDER_APP_URL' in GitHub repository secrets if your backend is deployed."
+          fi
+          npm run build
 
       # Publishes Vite build output (dist) directly to GitHub Pages
       - name: Deploy to GitHub Pages
