@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: inventory-auth-service
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:inventory-service}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+
+# Security and JWT Configurations
+app:
+  jwt:
+    # Base64 encoded secret key (minimum 256 bits for HMAC-SHA256)
+    # This represents: "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"
+    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    # Access Token expiration: 15 minutes (in milliseconds: 900,000)
+    access-expiration-ms: 900000
+    # Refresh Token expiration: 7 days (in milliseconds: 604,800,000)
+    refresh-expiration-ms: 604800000
+
+# Springdoc OpenAPI Config
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+logging:
+  level:
+    org.springframework.security: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
